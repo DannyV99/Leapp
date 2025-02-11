@@ -1,0 +1,5 @@
+---
+    - name: Disable FaPolicyD
+      ansible.builtin.service:
+        name: fapolicyd
+        state: stopped

@@ -1,0 +1,16 @@
+---
+
+        - name: Check if logfile from the first Analysis exists
+          ansible.builtin.stat:
+            path: /var/log/ripu/ripu.log
+          register: ripu_log_stat
+
+        - name: Gather current timestamp
+          ansible.builtin.setup:
+            gather_subset:
+              - date_time
+
+        - name: Move the logfile from the first Analysis with timestamp
+          ansible.builtin.command:
+            cmd: mv /var/log/ripu/ripu.log /var/log/ripu/ripu.log-{{ ansible_date_time.iso8601_basic_short }}
+          when: ripu_log_stat.stat.exists

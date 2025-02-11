@@ -1,0 +1,44 @@
+---
+
+    - name: Check if GRUB backup exists
+      stat:
+        path: /etc/dnf/dnf.conf.bak
+      register: dnf_backup
+
+    - name: Restore DNF configuration from backup
+      copy:
+        src: /etc/dnf/dnf.conf.bak
+        dest: /etc/dnf/dnf.conf
+        remote_src: true
+        owner: root
+        group: root
+        mode: '0644'
+      when: dnf_backup.stat.exists
+         
+
+    - name: Check if GRUB backup exists
+      stat:
+        path: /etc/default/grub.bak
+      register: grub_backup
+
+    - block:
+
+        - name: Restore GRUB configuration from backup
+          copy:
+            src: /etc/default/grub.bak
+            dest: /etc/default/grub
+            remote_src: true
+            owner: root
+            group: root
+            mode: '0644'
+
+        - name: Update GRUB after restoring configuration
+          command: grub2-mkconfig -o /boot/grub2/grub.cfg
+
+        - name: Reboot system
+          reboot:
+            msg: "Rebooting system to apply GRUB changes."
+            connect_timeout: 5
+            reboot_timeout: 500
+      
+      when: grub_backup.stat.exists

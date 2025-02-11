@@ -1,0 +1,11 @@
+== Supported RHEL Versions
+
+The collection supports RHEL in-place upgrades for the following RHEL versions:
+
+- RHEL 6 to RHEL 7 (RUT)
+- RHEL 7 to RHEL 8 (Leapp)
+- RHEL 8 to RHEL 9 (Leapp)
+
+The collection may be used for the RHEL upgrade paths and minor versions supported by the indicated upgrade utilities (Leapp or RUT). Refer to the Red Hat knowledge solution article [Supported in-place upgrade paths for Red Hat Enterprise Linux](https://access.redhat.com/articles/4263361) for the latest support details.
+
+The roles in this collection have been successfully used in a number of different environments including on-prem bare metal servers and VMs pulling RHEL packages from Red Hat CDN repos, Satellite content views, or mirrored repos internal to disconnected networks. Upgrading RHEL on Amazon EC2 instances pulling from bring-your-own-subscription CDN repos or pay-as-you-go RHUI repos have also been tested. Upgrading RHEL on other public clouds should be possible as well after setting the documented role variables as required.

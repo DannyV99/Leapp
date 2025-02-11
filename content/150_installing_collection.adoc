@@ -1,0 +1,4 @@
+== Installing the Collection
+
+Before using this collection, you need to install it with the Ansible Galaxy command-line tool:
+

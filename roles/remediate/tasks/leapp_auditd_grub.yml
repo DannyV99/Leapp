@@ -1,0 +1,24 @@
+---
+    - name: Backup existing GRUB configuration
+      copy:
+        src: /etc/default/grub
+        dest: /etc/default/grub.bak
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Add audit=0 to GRUB_CMDLINE_LINUX if not present
+      lineinfile:
+        path: /etc/default/grub
+        regexp: '^GRUB_CMDLINE_LINUX='
+        line: "GRUB_CMDLINE_LINUX=\"audit=0\""
+        backrefs: yes
+
+    - name: Regenerate GRUB configuration
+      command: grub2-mkconfig -o /boot/grub2/grub.cfg
+
+    - name: Reboot system
+      reboot:
+        msg: "Rebooting system to apply GRUB changes."
+        connect_timeout: 5
+        reboot_timeout: 500

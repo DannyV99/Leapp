@@ -1,0 +1,161 @@
+---
+# defaults file for upgrade
+leapp_upgrade_type: satellite
+# leapp_upgrade_type: cdn
+# leapp_upgrade_type: rhui
+# leapp_upgrade_type: custom
+
+leapp_upgrade_opts: "{{ '--no-rhsm' if leapp_upgrade_type == 'rhui' or leapp_upgrade_type == 'custom' else '' }}"
+
+leapp_repos_enabled: []
+# leapp_repos_enabled:
+#   - satellite-client-6-for-rhel-{{ ansible_distribution_major_version | int + 1 }}-x86_64-rpms
+
+rhel_7_network_install_repo_url: http://capsule1.example.com/pub/ISO/RHEL7.9
+
+# Satellite Organization and Activation Keys are required if using Satellite to change content views
+# unless the content view already in use has all required repositories.
+# satellite_organization: Example
+# satellite_activation_key_leapp: rhel{{ ansible_distribution_major_version }}_leapp
+# satellite_activation_key_post_leapp: rhel{{ ansible_distribution_major_version }}_prod
+
+# For leapp_upgrade_type == "custom"
+# Used to configure repos before running leapp analysis / installing leapp packages.
+local_repos_pre_leapp: []
+# local_repos_pre_leapp:
+#   - name: rhel-server-7-rpms
+#     description: Red Hat 7 Server
+#     baseurl: http://repo02.example.com/leapp/7Server/rhel-server-7-rpms
+#     # enabled: 1 # Default 1
+#     # gpgcheck: 0 # Default 0
+#     # gpgkey: XXX # Default omit.
+#     # repo_gpgcheck: 0 # Default omit.
+#     # file: local # The filename to use in /etc/yum.repos.d minus the .repo, default local.
+#     # state: present # Defaults to present
+#   - name: rhel-server-7-rpms
+#     description: Red Hat 7 Server
+#     baseurl: http://repo02.example.com/leapp/7Server/rhel-server-7-rpms
+#     # enabled: 1 # Default 1
+#     # gpgcheck: 0 # Default 0
+#     # gpgkey: XXX # Default omit.
+#     # repo_gpgcheck: 0 # Default omit.
+#     # file: local # The filename to use in /etc/yum.repos.d minus the .repo, default local.
+#     # state: present # Defaults to present
+
+# For leapp_upgrade_type == "custom"
+# Used to generate /etc/leapp/files/leapp_upgrade_repositories.repo
+local_repos_leapp: []
+# local_repos_leapp:
+#   - name: rhel-8-for-x86_64-baseos-rpms
+#     description: Red Hat 8.10 Base OS
+#     baseurl: http://repo03.example.com/8.10/rhel-8-for-x86_64-baseos-rpms
+#     # enabled: 1 # Default 1
+#     # gpgcheck: 0 # Default 0
+#     # gpgkey: XXX # Default omit.
+#     # repo_gpgcheck: 0 # Default omit.
+#     # Can include file in this data structure to reuse this for local_repos_post_upgrade.
+#     # file: local # Will be ignored for leapp_upgrade_repositories.repo
+#     # state: present # Defaults to present.
+#   - name: rhel-8-for-x86_64-appstream-rpms
+#     description: Red Hat 8.10 App Stream
+#     baseurl: http://repo03.example.com/8.10/rhel-8-for-x86_64-baseos-rpms
+#     # enabled: 1 # Default 1
+#     # gpgcheck: 0 # Default 0
+#     # gpgkey: XXX # Default omit.
+#     # repo_gpgcheck: 0 # Default omit.
+#     # Can include file in this data structure to reuse this for local_repos_post_upgrade.
+#     # file: local # Will be ignored for leapp_upgrade_repositories.repo
+#     # state: present # Defaults to present.
+
+# For leapp_upgrade_type == "custom"
+# Used to rename previous previous repo files with timestamp at the end for future reference.
+# /etc/yum.repos.d/ prepended to file names in task.
+repo_files_to_remove_at_upgrade: []
+# repo_files_to_remove_at_upgrade:
+#   - rhel7Server.repo
+
+# For leapp_upgrade_type == "custom"
+# Applied using ansible.builtin.yum_repository post upgrade.
+local_repos_post_upgrade: []
+# local_repos_post_upgrade: "{{ local_repos_leapp }}" # If same.
+# local_repos_post_upgrade:
+#   - name: rhel-8-for-x86_64-baseos-rpms
+#     description: Red Hat 8 Base OS
+#     baseurl: http://repo01.example.com/8/rhel-8-for-x86_64-baseos-rpms
+#     # file: local # The filename to use in /etc/yum.repos.d minus the .repo, default local.
+#     # enabled: 0 # Default 1
+#     # gpgcheck: 1 # Default 0
+#     # gpgkey: XXX # Default omit.
+#     # repo_gpgcheck: 0 # Default omit.
+#     # state: present # Defaults to present.
+#   - name: rhel-8-for-x86_64-appstream-rpms
+#     description: Red Hat 8 App Stream
+#     baseurl: http://repo01.example.com/8/rhel-8-for-x86_64-baseos-rpms
+#     # file: local # The filename to use in /etc/yum.repos.d minus the .repo, default local.
+#     # enabled: 0 # Default 1
+#     # gpgcheck: 1 # Default 0
+#     # gpgkey: XXX # Default omit.
+#     # repo_gpgcheck: 0 # Default omit.
+#     # state: present # Defaults to present.
+
+# Dict of env vars to be used when the leapp command is run
+leapp_env_vars: {}
+# leapp_env_vars:
+#   LEAPP_UNSUPPORTED: 1
+#   LEAPP_DEVEL_DATABASE_SYNC_OFF: 1
+
+# Desired selinux mode post Leapp upgrade.
+# selinux_mode: enforcing
+# selinux_mode: permissive
+# selinux_mode: disabled
+# Default selinux_mode to what was found during the pre-upgrade analysis automation.
+# The config_mode fact is not created if selinux is disabled so default the variable to "disabled"
+selinux_mode: "{{ ansible_facts.ansible_local.pre_ripu.selinux.config_mode | default('disabled') }}"
+
+# System-wide cryptographic policies
+# set_crypto_policies: false
+set_crypto_policies: true
+crypto_policy: DEFAULT
+# crypto_policy: FUTURE
+# crypto_policy: DEFAULT:SHA1
+
+# Whether or not to update from legacy grub to grub2 in post-upgrade steps from RHEL 6 -> 7.
+update_grub_to_grub_2: false
+pre_upgrade_update: true
+post_upgrade_update: true
+post_upgrade_unset_release: true
+post_upgrade_release: ""
+
+# Used by grub to grub2 upgrade in RHEL 6 to 7 post upgrade, and RHEL 7 to 8 post upgrade.
+# For grub to grub2 upgrade, if grub_boot_device is not defined, the parent device of /boot
+# will be used if present, else the parent device of / will be used.
+# For RHEL 7 to 8 post upgrade, used to grub2-install on a device other than the disk
+# /boot is on.
+# grub_boot_device: /dev/sda
+
+reboot_timeout: 7200
+upgrade_timeout: 14400
+post_reboot_delay: 120
+
+leapp_resume_retries: 360
+leapp_resume_delay: 10
+
+os_path: $PATH
+
+async_timeout_maximum: 7200
+async_poll_interval: 60
+
+check_leapp_analysis_results: true
+
+kernel_modules_to_unload_before_upgrade: []
+
+post_7_to_8_python_interpreter: /usr/libexec/platform-python
+
+# Set which Ansible Collection to use for the Linux System Roles.
+# For community/upstream, use 'fedora.linux_system_roles'
+# For the RHEL System Roles, use 'redhat.rhel_system_roles'
+# - fedora.linux_system_roles
+# - redhat.rhel_system_roles
+infra_leapp_upgrade_system_roles_collection: fedora.linux_system_roles
+
+...

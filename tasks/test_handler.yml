@@ -1,0 +1,36 @@
+---
+    - name: Add end time to log file (TEST)
+      ansible.builtin.lineinfile:
+        path: "/var/log/ripu/ripu.log"
+        line: "Job ended at {{ now(fmt='%Y-%m-%dT%H:%M:%SZ', utc=true) }}"
+        owner: root
+        group: root
+        mode: "0644"
+          #      listen: Archive log file
+
+    - name: Check if ripu.log exists
+      ansible.builtin.stat:
+        path: "/var/log/ripu/ripu.log"
+      register: ripu_log_stat
+        #      listen: Archive log file
+
+    - name: Slurp ripu.log file
+      ansible.builtin.slurp:
+        src: "/var/log/ripu/ripu.log"
+      register: ripu_log_file_slurp
+      when: ripu_log_stat.stat.exists
+        #      listen: Archive log file
+
+    - name: Decode ripu.log file
+      ansible.builtin.set_fact:
+        ripu_log_file: "{{ (ripu_log_file_slurp.content | b64decode).split('\n') }}"
+      when: ripu_log_stat.stat.exists
+        #      listen: Archive log file
+
+    - name: Rename log file
+      ansible.builtin.shell: |
+        export PATH={{ os_path | default('/usr/bin:/bin') }}
+        mv /var/log/ripu/ripu.log /var/log/ripu/ripu.log-{{ ansible_date_time.iso8601_basic_short }}
+      when: ripu_log_stat.stat.exists
+        #      listen: Archive log file
+      changed_when: true

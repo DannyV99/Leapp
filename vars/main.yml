@@ -1,0 +1,39 @@
+---    
+
+###### ANALYSIS VARIABLES ######
+
+satellite_organization: "Family"
+satellite_activation_key_pre_leapp: "Leapp"
+satellite_activation_key_leapp: "Leapp"
+
+# By default the analysis role will use:
+# analysis_repos_el7: rhel-7-server-extras-rpms
+# Optionally override the default analysis_repos_el7 to use the upstream copr leapp repository:
+# analysis_repos_el7: copr:copr.fedorainfracloud.org:group_oamg:leapp
+
+leapp_preupg_opts: --target 9.4
+leapp_answerfile: |
+  [remove_pam_pkcs11_module_check]
+  confirm = True
+
+
+  
+###### REMEDIATION VARIABLES ######
+
+remediation_todo:
+  - leapp_vdo_check_needed
+  - leapp_firewalld_allowzonedrifting
+  - leapp_gpgcheck_dnf
+  - leapp_auditd_grub
+  - leapp_fapolicyd_disable
+
+
+    
+###### UPGRADE VARIABLES ######
+
+leapp_upgrade_opts: --target 9.4
+update_grub_to_grub_2: true
+selinux_mode: permissive
+infra_leapp_upgrade_system_roles_collection: 'redhat.rhel_system_roles'
+post_upgrade_release: '9.4'
+set_crypto_policies: false

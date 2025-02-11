@@ -1,0 +1,96 @@
+---
+- name: analysis-leapp | Register to leapp activation key
+  community.general.redhat_subscription:
+    state: present
+    activationkey: "{{ satellite_activation_key_leapp }}"
+    org_id: "{{ satellite_organization }}"
+    force_register: true
+  notify: Register to pre leapp activation key
+  when:
+    - leapp_upgrade_type == 'satellite'
+    - satellite_organization is defined
+    - satellite_activation_key_leapp is defined
+
+- name: analysis-leapp | Include custom_local_repos for local_repos_pre_leapp
+  vars:
+    __repos: "{{ local_repos_pre_leapp }}"
+  ansible.builtin.include_role:
+    name: infra.leapp.common
+    tasks_from: custom_local_repos
+  when: leapp_upgrade_type == "custom"
+
+- name: analysis-leapp | Install packages for preupgrade analysis on RHEL 7
+  ansible.builtin.package:
+    name: "{{ analysis_packages_el7 }}"
+    enablerepo: "{{ analysis_repos_el7 }}"
+    state: latest # noqa package-latest
+  when: ansible_distribution_major_version|int == 7
+
+- name: analysis-leapp | Install packages for preupgrade analysis on RHEL 8
+  ansible.builtin.package:
+    name: "{{ analysis_packages_el8 }}"
+    state: latest # noqa package-latest
+  when: ansible_distribution_major_version|int == 8
+
+- name: analysis-leapp | Ensure leapp log directory exists
+  ansible.builtin.file:
+    path: /var/log/leapp
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: analysis-leapp | Populate leapp_answers file
+  ansible.builtin.copy:
+    content: "{{ leapp_answerfile }}"
+    dest: /var/log/leapp/answerfile
+    owner: root
+    group: root
+    mode: "0644"
+  when: leapp_answerfile is defined
+
+- name: analysis-leapp | Create /etc/leapp/files/leapp_upgrade_repositories.repo
+  vars:
+    __repos: "{{ local_repos_leapp }}"
+    __leapp_repo_file: /etc/leapp/files/leapp_upgrade_repositories
+  ansible.builtin.include_role:
+    name: infra.leapp.common
+    tasks_from: custom_local_repos
+  when:
+    - leapp_upgrade_type == 'custom'
+    - local_repos_leapp | length > 0
+
+- name: analysis-leapp | Leapp preupgrade report
+  ansible.builtin.shell: >
+    set -o pipefail;
+    export PATH={{ os_path }};
+    ulimit -n 16384;
+    leapp preupgrade --report-schema=1.2.0
+    {{ leapp_preupg_opts }}
+    {{ leapp_enable_repos_args }}
+    2>&1 | tee -a {{ log_file }}
+  environment: "{{ leapp_env_vars }}"
+  changed_when: true
+  register: leapp
+  args:
+    executable: /bin/bash
+  async: "{{ async_timeout_maximum | int }}"
+  poll: "{{ async_poll_interval | int }}"
+  failed_when: "'report has been generated' not in leapp.stdout"
+
+- name: analysis-leapp | Include custom_local_repos for local_repos_post_analysis
+  vars:
+    __repos: "{{ local_repos_post_analysis }}"
+  ansible.builtin.include_role:
+    name: infra.leapp.common
+    tasks_from: custom_local_repos
+  when: leapp_upgrade_type == "custom"
+
+- name: analysis-leapp | Include check-results-file.yml
+  ansible.builtin.include_tasks: check-results-file.yml
+
+- name: analysis-leapp | Include the parse_leapp_report role to check for inhibitors
+  ansible.builtin.include_role:
+    name: infra.leapp.parse_leapp_report
+
+...

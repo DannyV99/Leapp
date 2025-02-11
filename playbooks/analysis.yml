@@ -1,0 +1,25 @@
+---
+- name: Analysis
+  hosts: all
+  strategy: free
+  gather_facts: true
+  become: true
+  force_handlers: true
+
+  vars:
+    satellite_organization: ""
+    satellite_activation_key_pre_leapp: ""
+    satellite_activation_key_leapp: ""
+    # By default the analysis role will use:
+    # analysis_repos_el7: rhel-7-server-extras-rpms
+    # Optionally override the default analysis_repos_el7 to use the upstream copr leapp repository:
+    # analysis_repos_el7: copr:copr.fedorainfracloud.org:group_oamg:leapp
+    leapp_preupg_opts: --target 9.4
+    leapp_answerfile: |
+      [remove_pam_pkcs11_module_check]
+      confirm = True
+  tasks:
+    - name: Generate preupgrade analysis report
+      ansible.builtin.import_role:
+        name: ../roles/analysis
+...

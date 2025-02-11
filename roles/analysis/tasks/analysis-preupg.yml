@@ -1,0 +1,129 @@
+---
+# TODO: Having issues with community.general.redhat_subscription and subscription-manager on RHEL 6.
+- name: analysis-preupg | Register to upgrade activation key
+  ansible.builtin.shell: >
+    export PATH={{ os_path }};
+    subscription-manager register
+    --org="{{ satellite_organization }}"
+    --activationkey="{{ satellite_activation_key_pre_leapp }}"
+    --force
+  when:
+    - leapp_upgrade_type == 'satellite'
+    - satellite_organization is defined
+    - satellite_activation_key_pre_leapp is defined
+  notify: Register to pre leapp activation key RHEL 6
+  register: sub_man_reg
+  failed_when: false
+  changed_when: true
+
+- name: analysis-preupg | Include custom_local_repos for local_repos_pre_leapp
+  vars:
+    __repos: "{{ local_repos_pre_leapp }}"
+  ansible.builtin.include_role:
+    name: infra.leapp.common
+    tasks_from: custom_local_repos
+  when: leapp_upgrade_type == "custom"
+
+- name: analysis-preupg | Enable requisite RHUI repos
+  ansible.builtin.shell: |
+    set -o pipefail;
+    export PATH={{ os_path }};
+    yum-config-manager --enable {{ item }}
+  loop: "{{ analysis_repos_el6 }}"
+  when: leapp_upgrade_type == 'rhui'
+  failed_when: false
+  changed_when: true
+
+- name: analysis-preupg | Preupgrade Assistant and Red Hat Upgrade Tool packages are latest
+  ansible.builtin.package:
+    name: "{{ analysis_packages_el6 }}"
+    enablerepo: "{{ analysis_repos_el6 }}"
+    state: latest # noqa package-latest
+  when: leapp_upgrade_type != 'rhui'
+
+- name: analysis-preupg | Preupgrade Assistant and Red Hat Upgrade Tool packages are latest - RHUI
+  ansible.builtin.package:
+    name: "{{ analysis_packages_el6 }}"
+    state: latest # noqa package-latest
+  when: leapp_upgrade_type == 'rhui'
+
+- name: analysis-preupg | Lynx is installed for text report
+  ansible.builtin.package:
+    name: lynx
+    state: present
+  notify: Remove lynx package
+
+- name: analysis-preupg | Filesystem capacity checks
+  ansible.builtin.script: check-inodes.sh
+  changed_when: false
+  when: bypass_fs_checks is not defined or (bypass_fs_checks is defined and bypass_fs_checks | lower != 'yes')
+
+- name: analysis-preupg | Run preupg
+  ansible.builtin.shell: >
+    set -o pipefail;
+    export PATH={{ os_path }};
+    preupg --force --text
+    2>&1 | tee -a {{ log_file }}
+  register: preupg
+  args:
+    executable: /bin/bash
+  async: "{{ async_timeout_maximum | int }}"
+  poll: "{{ async_poll_interval | int }}"
+  failed_when: false
+  changed_when: true
+
+- name: analysis-preupg | Assert that preupg did not encounter errors
+  ansible.builtin.assert:
+    that: not preupg_return_codes[preupg.rc].fail
+    msg: "{{ preupg_return_codes[preupg.rc].msg }}"
+
+- name: analysis-preupg | Include custom_local_repos for local_repos_post_analysis
+  vars:
+    __repos: "{{ local_repos_post_analysis }}"
+  ansible.builtin.include_role:
+    name: infra.leapp.common
+    tasks_from: custom_local_repos
+  when: leapp_upgrade_type == "custom"
+
+- name: analysis-preupg | Include check-results-file.yml
+  ansible.builtin.include_tasks: check-results-file.yml
+
+- name: analysis-preupg | Collect human readable report results
+  ansible.builtin.slurp:
+    src: "{{ result_filename }}"
+  register: results
+
+- name: analysis-preupg | Parse report results
+  ansible.builtin.set_fact:
+    preupg_report_txt: "{{ (results.content | b64decode).split('\n') }}"
+
+- name: analysis-preupg | Check for inhibitors
+  ansible.builtin.set_fact:
+    upgrade_inhibited: "{{ preupg_return_codes[preupg.rc].inhibited }}"
+
+# We already have preupg_report_txt that has this info in it.
+# However, this makes it work the same as leapp which is using
+# some awk magic to parse the file.
+- name: analysis-preupg | Collect inhibitors
+  ansible.builtin.command:
+    cmd: grep "preupg.risk.EXTREME:" {{ result_filename }}
+  register: results_inhibitors
+  changed_when: false
+  failed_when: false
+
+- name: analysis-preupg | Collect high errors
+  ansible.builtin.command:
+    cmd: egrep -i "preupg.risk.HIGH:.*not enough free space" {{ result_filename }}
+  register: results_errors
+  changed_when: false
+  failed_when: false
+
+- name: analysis-preupg | Check for not enough space errors and update upgrade_inhibited
+  ansible.builtin.set_fact:
+    upgrade_inhibited: true
+  when: results_errors.stdout_lines | length > 0
+
+- name: analysis-preupg | Capture inhibitors in a list leapp_inhibitors
+  ansible.builtin.set_fact:
+    leapp_inhibitors: "{{ results_inhibitors.stdout_lines + results_errors.stdout_lines }}"
+...

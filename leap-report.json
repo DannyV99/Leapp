@@ -1,0 +1,282 @@
+{
+  "entries": [
+    {
+      "audience": "sysadmin",
+      "detail": {
+        "remediations": [
+          {
+            "context": "If some of excluded repositories are still required to be used during the upgrade, execute leapp with the --enablerepo option with the repoid of the repository required to be enabled as an argument (the option can be used multiple times).",
+            "type": "hint"
+          }
+        ]
+      },
+      "groups": [
+        "repository",
+        "failure"
+      ],
+      "key": "1b9132cb2362ae7830e48eee7811be9527747de8",
+      "severity": "info",
+      "summary": "The following repositories are not supported by Red Hat and are excluded from the list of repositories used during the upgrade.\n- codeready-builder-beta-for-rhel-9-s390x-rpms\n- codeready-builder-beta-for-rhel-9-aarch64-rpms\n- codeready-builder-for-rhel-9-ppc64le-eus-rpms\n- rhui-codeready-builder-for-rhel-9-x86_64-rhui-rpms\n- codeready-builder-for-rhel-9-x86_64-eus-rpms\n- codeready-builder-for-rhel-9-s390x-eus-rpms\n- codeready-builder-for-rhel-9-aarch64-eus-rpms\n- codeready-builder-for-rhel-9-x86_64-rhui-rpms\n- codeready-builder-beta-for-rhel-9-x86_64-rpms\n- codeready-builder-beta-for-rhel-9-ppc64le-rpms\n- codeready-builder-for-rhel-9-s390x-rpms\n- codeready-builder-for-rhel-9-aarch64-rpms\n- codeready-builder-for-rhel-9-rhui-rpms\n- codeready-builder-for-rhel-9-ppc64le-rpms\n- rhui-codeready-builder-for-rhel-9-aarch64-rhui-rpms\n- codeready-builder-for-rhel-9-x86_64-rpms",
+      "title": "Excluded target system repositories",
+      "timeStamp": "2025-02-03T15:25:53.610471Z",
+      "hostname": "localhost.localdomain",
+      "actor": "repositories_blacklist",
+      "id": "9ddc818f4fe757c18249e47c86101ab1d27defa530e4c6d769ea87826052acdf"
+    },
+    {
+      "audience": "sysadmin",
+      "detail": {
+        "related_resources": [
+          {
+            "scheme": "package",
+            "title": "jitterentropy-devel"
+          }
+        ]
+      },
+      "groups": [
+        "repository"
+      ],
+      "key": "2437e204808f987477c0e9be8e4c95b3a87a9f3e",
+      "severity": "high",
+      "summary": "1 packages will be skipped because they are available only in target system repositories that are intentionally excluded from the list of repositories used during the upgrade. See the report message titled \"Excluded target system repositories\" for details.\nThe list of these packages:\n- jitterentropy-devel (repoid: codeready-builder-for-rhel-9-x86_64-rpms)",
+      "title": "Packages available in excluded repositories will not be installed",
+      "timeStamp": "2025-02-03T15:26:08.732135Z",
+      "hostname": "localhost.localdomain",
+      "actor": "pes_events_scanner",
+      "id": "b5778bd0161eb5c7b2b2c2a8e4cbe1b1d5108a103769716a7b91d6ea9e82bdfc"
+    },
+    {
+      "audience": "sysadmin",
+      "detail": {
+        "related_resources": [
+          {
+            "scheme": "package",
+            "title": "openssh-server"
+          },
+          {
+            "scheme": "file",
+            "title": "/etc/ssh/sshd_config"
+          }
+        ]
+      },
+      "groups": [
+        "authentication",
+        "security",
+        "network",
+        "services"
+      ],
+      "key": "96da6937c25c6492e4f1228ee146795989fd3718",
+      "severity": "info",
+      "summary": "OpenSSH server configuration needs to be modified to contain Include directive for the RHEL9 to work properly and integrate with the other parts of the OS. The following snippet will be added to the /etc/ssh/sshd_config during the ApplicationsPhase: `Include /etc/ssh/sshd_config.d/*.conf`",
+      "title": "The upgrade will prepend the Include directive to OpenSSH sshd_config",
+      "timeStamp": "2025-02-03T15:26:11.543844Z",
+      "hostname": "localhost.localdomain",
+      "actor": "open_ssh_drop_in_directory_check",
+      "id": "be354c81a5be77d5abff058600183da0ccc0d4c6703f28e0e90c9652739475ea"
+    },
+    {
+      "audience": "sysadmin",
+      "groups": [
+        "services"
+      ],
+      "key": "693963253195f418526f045b6d630a1f4c7a193d",
+      "severity": "info",
+      "summary": "After the upgrade, this system will be automatically registered into Red Hat Insights. To skip the automatic registration, use the '--no-insights-register' command line option or set the LEAPP_NO_INSIGHTS_REGISTER environment variable.",
+      "title": "Automatic registration into Red Hat Insights",
+      "timeStamp": "2025-02-03T15:26:11.990738Z",
+      "hostname": "localhost.localdomain",
+      "actor": "check_insights_auto_register",
+      "id": "a51c7c3867df2bf65aa1bdf04eddacd6dac00455b824da231998a2b7d11c394d"
+    },
+    {
+      "audience": "sysadmin",
+      "detail": {
+        "external": [
+          {
+            "title": "Importing existing VDO volumes to LVM",
+            "url": "https://red.ht/import-existing-vdo-volumes-to-lvm"
+          }
+        ],
+        "remediations": [
+          {
+            "context": "Install the 'vdo' package and re-run upgrade to check for VDO devices requiring conversion or confirm that all VDO devices, if any, are managed by LVM.",
+            "type": "hint"
+          }
+        ]
+      },
+      "groups": [
+        "services",
+        "drivers",
+        "inhibitor"
+      ],
+      "key": "429a99e13b19a7eebadbb8cb35233d8119bcf255",
+      "severity": "high",
+      "summary": "The check of block devices could not be performed as the 'vdo' package is not installed. All VDO devices must be converted to LVM management prior to the upgrade to prevent the loss of data.",
+      "title": "Cannot perform the VDO check of block devices",
+      "timeStamp": "2025-02-03T15:26:12.311836Z",
+      "hostname": "localhost.localdomain",
+      "actor": "check_vdo",
+      "id": "2283c60603eb2f79d8a24e185d66d1bd8aa1e3841435033cb799916aa30218df"
+    },
+    {
+      "audience": "sysadmin",
+      "groups": [
+        "kernel",
+        "boot",
+        "inhibitor"
+      ],
+      "key": "f79672290945c09de12a14b28906b98d5c8ed68a",
+      "severity": "high",
+      "summary": "Support for the following processors has been removed in RHEL 9:\n     - Unsupported Family 19h\n",
+      "title": "Leapp detected a processor which is no longer supported in RHEL 9. Upgrade cannot proceed.",
+      "timeStamp": "2025-02-03T15:26:12.454814Z",
+      "hostname": "localhost.localdomain",
+      "actor": "check_detected_devices_and_drivers",
+      "id": "4d365627e8c8b70d4f4083d30a01c0de8d05632ba4026cbb57e83565ab6bb00c"
+    },
+    {
+      "audience": "sysadmin",
+      "groups": [
+        "kernel",
+        "drivers"
+      ],
+      "key": "b03c306f274b33b4cf3c7cd3764366c599681481",
+      "severity": "high",
+      "summary": "The following RHEL 8 device drivers are no longer maintained RHEL 9:\n     - e1000\n     - e1000\n",
+      "title": "Leapp detected loaded kernel drivers which are no longer maintained in RHEL 9.",
+      "timeStamp": "2025-02-03T15:26:12.463554Z",
+      "hostname": "localhost.localdomain",
+      "actor": "check_detected_devices_and_drivers",
+      "id": "3908cdd5e017858f0c0f46a641b153ed09c72de0a457f8dbbc071ad5e3b0f436"
+    },
+    {
+      "audience": "sysadmin",
+      "groups": [
+        "selinux",
+        "security"
+      ],
+      "key": "8fb81863f8413bd617c2a55b69b8e10ff03d7c72",
+      "severity": "info",
+      "summary": "SElinux relabeling will be scheduled as the status is permissive/enforcing.",
+      "title": "SElinux relabeling will be scheduled",
+      "timeStamp": "2025-02-03T15:26:17.322816Z",
+      "hostname": "localhost.localdomain",
+      "actor": "check_se_linux",
+      "id": "1f29d8d3a19e96d4c80bd6fd05186ccac547a388dd74a9638f968196fffa0f38"
+    },
+    {
+      "audience": "sysadmin",
+      "detail": {
+        "remediations": [
+          {
+            "context": "Make sure there are no SElinux related warnings after the upgrade and enable SElinux manually afterwards. Notice: You can ignore the \"/root/tmp_leapp_py3\" SElinux warnings.",
+            "type": "hint"
+          }
+        ]
+      },
+      "groups": [
+        "selinux",
+        "security"
+      ],
+      "key": "39d7183dafba798aa4bbb1e70b0ef2bbe5b1772f",
+      "severity": "low",
+      "summary": "SElinux will be set to permissive mode. Current mode: enforcing. This action is required by the upgrade process to make sure the upgraded system can boot without beinig blocked by SElinux rules.",
+      "title": "SElinux will be set to permissive mode",
+      "timeStamp": "2025-02-03T15:26:17.333975Z",
+      "hostname": "localhost.localdomain",
+      "actor": "check_se_linux",
+      "id": "2ec7bd750e8f01b64cfc2368573b4c518116da06bb0a0ce22c0817e9a2c8e4b4"
+    },
+    {
+      "audience": "sysadmin",
+      "detail": {
+        "external": [
+          {
+            "title": "Changes in firewalld related to Zone Drifting",
+            "url": "https://access.redhat.com/articles/4855631"
+          }
+        ],
+        "remediations": [
+          {
+            "context": "Set AllowZoneDrifting=no in /etc/firewalld/firewalld.conf",
+            "type": "hint"
+          },
+          {
+            "context": [
+              "sed",
+              "-i",
+              "s/^AllowZoneDrifting=.*/AllowZoneDrifting=no/",
+              "/etc/firewalld/firewalld.conf"
+            ],
+            "type": "command"
+          }
+        ]
+      },
+      "groups": [
+        "sanity",
+        "firewall",
+        "inhibitor"
+      ],
+      "key": "5b1cf050e1a877b0358b6e8c612277c591d40c13",
+      "severity": "high",
+      "summary": "Firewalld has enabled configuration option \"AllowZoneDrifiting\" which has been removed in RHEL-9. New behavior is as if \"AllowZoneDrifiting\" was set to \"no\".",
+      "title": "Firewalld Configuration AllowZoneDrifting Is Unsupported",
+      "timeStamp": "2025-02-03T15:26:17.476474Z",
+      "hostname": "localhost.localdomain",
+      "actor": "firewalld_check_allow_zone_drifting",
+      "id": "66e48cca17438e2247426b16f6aefdb67351a0c5b76b62f68fec73670ad792be"
+    },
+    {
+      "audience": "sysadmin",
+      "groups": [
+        "boot"
+      ],
+      "key": "ac7030e05d2ee248d34f08a9fa040b352bc410a3",
+      "severity": "high",
+      "summary": "On legacy (BIOS) systems, GRUB2 core (located in the gap between the MBR and the first partition) cannot be updated during the rpm transaction and Leapp has to initiate the update running \"grub2-install\" after the transaction. No action is needed before the upgrade. After the upgrade, it is recommended to check the GRUB configuration.",
+      "title": "GRUB2 core will be automatically updated during the upgrade",
+      "timeStamp": "2025-02-03T15:26:17.637799Z",
+      "hostname": "localhost.localdomain",
+      "actor": "check_grub_core",
+      "id": "6fe52057dce8c88f883f91f32de0fdfb8a2d5ce877df2d533654c959bb4e088e"
+    },
+    {
+      "audience": "sysadmin",
+      "detail": {
+        "related_resources": [
+          {
+            "scheme": "dialog",
+            "title": "check_vdo.confirm"
+          }
+        ],
+        "remediations": [
+          {
+            "context": "Please register user choices with leapp answer cli command or by manually editing the answerfile.",
+            "type": "hint"
+          },
+          {
+            "context": [
+              "leapp",
+              "answer",
+              "--section",
+              "check_vdo.confirm=True"
+            ],
+            "type": "command"
+          }
+        ]
+      },
+      "groups": [
+        "inhibitor"
+      ],
+      "key": "2f9802dc91315806c7cdc3c18d7b74f2a2383285",
+      "severity": "high",
+      "summary": "One or more sections in answerfile are missing user choices: check_vdo.confirm\nFor more information consult https://red.ht/leapp-dialogs.",
+      "title": "Missing required answers in the answer file",
+      "timeStamp": "2025-02-03T15:26:19.951392Z",
+      "hostname": "localhost.localdomain",
+      "actor": "verify_check_results",
+      "id": "6a53f246d8fe55e299806c6516cd6601facc49d0b012aea68d37b373d1bec7eb"
+    }
+  ],
+  "leapp_run_id": "bb47a759-d322-4b0a-9f18-f7c99680b5c7"
+}

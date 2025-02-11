@@ -1,0 +1,24 @@
+---
+    - name: Backup existing DNF configuration
+      copy:
+        src: /etc/dnf/dnf.conf
+        dest: /etc/dnf/dnf.conf.bak
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Ensure gpgcheck=0 is set in /etc/dnf/dnf.conf
+      ansible.builtin.lineinfile:
+        path: /etc/dnf/dnf.conf
+        regexp: '^gpgcheck='
+        line: 'gpgcheck=0'
+        state: present
+        backup: yes
+
+    - name: Ensure localpkg_gpgcheck=0 is set in /etc/dnf/dnf.conf
+      ansible.builtin.lineinfile:
+        path: /etc/dnf/dnf.conf
+        regexp: '^localpkg_gpgcheck='
+        line: 'localpkg_gpgcheck=False'
+        state: present
+        backup: yes

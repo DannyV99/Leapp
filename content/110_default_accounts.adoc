@@ -1,0 +1,21 @@
+// About the RHEL Template >> Default accounts
+
+Default accounts in the template are used to create 
+
+[%header,cols="1,1,2"] 
+|===
+| Username
+| Password
+| Purpose
+
+| tempadmin
+| `ZAQ!XSW@cde3vfr4`
+| Initial temporary admin for login and setup
+
+| sofgrub
+| `Gr*bP@ssw0rd4S0f`
+| Grub username for editing grub configurations
+|===
+
+NOTE: The `sofadmin` account exists as a recovery account and should not be modified.  Contact the Virtualization Services Team if recovery assistance is required.
+

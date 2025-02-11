@@ -1,0 +1,53 @@
+---
+    - name: Backup existing DNF configuration
+      copy:
+        src: /etc/dnf/dnf.conf
+        dest: /etc/dnf/dnf.conf.bak
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Ensure gpgcheck=0 is set in /etc/dnf/dnf.conf
+      ansible.builtin.lineinfile:
+        path: /etc/dnf/dnf.conf
+        regexp: '^gpgcheck='
+        line: 'gpgcheck=0'
+        state: present
+        backup: yes
+
+    - name: Ensure localpkg_gpgcheck=0 is set in /etc/dnf/dnf.conf
+      ansible.builtin.lineinfile:
+        path: /etc/dnf/dnf.conf
+        regexp: '^localpkg_gpgcheck='
+        line: 'localpkg_gpgcheck=False'
+        state: present
+        backup: yes
+
+    - name: Backup existing GRUB configuration
+      copy:
+        src: /etc/default/grub
+        dest: /etc/default/grub.bak
+        owner: root
+        group: root
+        mode: '0644'
+
+    - name: Add audit=0 to GRUB_CMDLINE_LINUX if not present
+      lineinfile:
+        path: /etc/default/grub
+        regexp: '^GRUB_CMDLINE_LINUX='
+        line: "GRUB_CMDLINE_LINUX=\"audit=0\""
+        backrefs: yes
+
+    - name: Regenerate GRUB configuration
+      command: grub2-mkconfig -o /boot/grub2/grub.cfg
+
+    - name: Reboot system
+      reboot:
+        msg: "Rebooting system to apply GRUB changes."
+        connect_timeout: 5
+        reboot_timeout: 500
+
+    - name: Disable FaPolicyD
+      ansible.builtin.service:
+        name: fapolicyd
+        state: stopped

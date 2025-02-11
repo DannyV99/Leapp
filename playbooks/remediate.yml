@@ -1,0 +1,20 @@
+---
+- name: Remediate
+  hosts: all
+  strategy: free
+  become: true
+  force_handlers: true
+  vars:
+    
+    remediation_todo:
+      - leapp_vdo_check_needed
+      - leapp_firewalld_allowzonedrifting
+      - leapp_gpgcheck_dnf
+      - leapp_auditd_grub
+      - leapp_fapolicyd_disable
+
+  tasks:
+    - name: Perform remediations on the system
+      ansible.builtin.import_role:
+        name: ../roles/remediate
+...

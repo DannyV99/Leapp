@@ -1,0 +1,99 @@
+---
+- name: Leapp Report Analyzer
+  hosts: all
+  gather_facts: false
+  vars:
+    severity_order:
+      - inhibitor
+      - high
+      - medium
+      - low
+      - info
+    html_table_options: "border='1' cellpadding='5' cellspacing='0'"
+    json_output_default: "leapp_report_analysis.json"
+    html_output_default: "leapp_report_analysis.html"
+    input_files: []
+    input_directory: '/var/log/leapp/'
+    output_json: "{{ json_output_default }}"
+    output_html: "{{ html_output_default }}"
+
+  tasks:
+    - name: Check if input directory exists
+      stat:
+        path: "{{ input_directory }}"
+      register: dir_stat
+
+    - name: Gather input files if directory is provided
+      find:
+        paths: "{{ input_directory }}"
+        patterns: "*.json"
+      when: dir_stat.stat.exists
+      register: found_files
+
+    - name: Set input files
+      set_fact:
+        input_files: "{{ found_files.files | map(attribute='path') | list }}"
+      when: dir_stat.stat.exists
+
+    - name: Ensure at least one input file is provided
+      fail:
+        msg: "No input files provided."
+      when: input_files | length == 0
+
+    - name: Process leapp report files
+      block:
+        - name: Parse leapp report data
+          script: parse_leapp_report.py
+          args:
+            chdir: "/tmp"
+            executable: python3
+          register: parsed_reports
+        - name: Merge grouped data
+          set_fact:
+            merged_grouped_data: "{{ merged_grouped_data | default({}) | merge(parsed_reports.results) }}"
+
+    - name: Order grouped data
+      set_fact:
+        ordered_merged_data: "{{ merged_grouped_data | dict2items | sort(attribute='key') | items2dict }}"
+
+    - name: Write JSON output
+      copy:
+        content: "{{ ordered_merged_data | to_json | indent(2) }}"
+        dest: "{{ output_json }}"
+
+    - name: Generate HTML tables
+      set_fact:
+        html_tables: |
+          <html>
+            <head><title>Leapp Report Analyzer</title></head>
+            <body>
+              <h3>Severity Levels Legend</h3>
+              <table {{ html_table_options }}>
+                <tr><th>Severity</th><th>Description</th></tr>
+                <tr><td>Inhibitor</td><td>Will inhibit the upgrade process</td></tr>
+                <tr><td>High</td><td>Very likely to result in a deteriorated system state</td></tr>
+                <tr><td>Medium</td><td>Can impact both the system and applications</td></tr>
+                <tr><td>Low</td><td>Should not impact the system but may affect applications</td></tr>
+                <tr><td>Info</td><td>Informational with no expected impact</td></tr>
+              </table>
+              {% for severity, entries in ordered_merged_data.items() %}
+              <h2>{{ severity.capitalize() }}</h2>
+              <table {{ html_table_options }}>
+                <tr><th>Entry Title</th><th>Hostnames</th><th>Remediations</th></tr>
+                {% for key, entry in entries.items() %}
+                <tr>
+                  <td>{{ entry.title }}</td>
+                  <td>{{ entry.hostnames | join(', ') }}</td>
+                  <td>{{ entry.remediations | join('<br>') }}</td>
+                </tr>
+                {% endfor %}
+              </table>
+              {% endfor %}
+            </body>
+          </html>
+
+    - name: Write HTML output
+      copy:
+        content: "{{ html_tables }}"
+        dest: "{{ output_html }}"
+

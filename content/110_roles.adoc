@@ -1,0 +1,13 @@
+== Roles
+
+These are the roles included in the collection. Follow the links below to see the detailed documentation and example playbooks for each role.
+
+analysis - Executes the Leapp pre-upgrade phase.
+
+common - Used for local logging, mutex locking, and common variables.
+
+parse_leapp_report - Reads pre-upgrade results and checks for inhibitors.
+
+upgrade - Executes the Leapp OS upgrade.
+
+remediate - Assists in the remediation of a system (RHEL 8 only).

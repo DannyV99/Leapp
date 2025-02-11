@@ -1,0 +1,70 @@
+---
+- name: In-Place Upgrade Playbook
+  hosts: all
+  gather_facts: true
+  become: true
+
+  vars_files:
+    vars/main.yml
+
+  tasks:
+
+    - name: Check Log and rotate if present
+      ansible.builtin.include_tasks: tasks/check_ripu_log.yml
+      
+    - name: Run Analysis Role
+      ansible.builtin.include_role:
+        name: roles/analysis
+
+    - name: Handler Tasks
+      ansible.builtin.include_tasks: tasks/test_handler.yml
+
+    - name: Generate Report 
+      ansible.builtin.include_tasks: tasks/generate_report.yml
+
+    - name: Run Analyzer Role to Check for Inhibitors
+      ansible.builtin.include_tasks: tasks/inhibitor_check.yml
+      register: analyzer_result
+
+    - block:
+
+        - name: Run Remediation Role if Inhibitors Found
+          ansible.builtin.include_role:
+            name: roles/remediate
+
+        - name: Re-run Analysis Role After Remediation
+          ansible.builtin.include_role:
+            name: roles/analysis
+
+        - name: Handler Tasks
+          ansible.builtin.include_tasks: tasks/test_handler.yml
+
+      when: inhibitors_present
+
+    - name: Run Analyzer Role to Check for Inhibitors
+      ansible.builtin.include_tasks: tasks/inhibitor_check.yml    
+      register: final_analyzer_result
+
+    - block:
+    
+        - name: Revert Back
+          ansible.builtin.include_tasks: tasks/reversal.yml
+
+        - name: End Playbook if Inhibitors Still Present
+          ansible.builtin.fail:
+            msg: "Upgrade cannot proceed. Inhibitors still present. Reverting changes."
+
+      when: inhibitors_present
+
+    - name: Check Log and rotate if present
+      ansible.builtin.include_tasks: tasks/check_ripu_log.yml
+
+    - name: Proceed with Upgrade Role if No Inhibitors
+      ansible.builtin.include_role:
+        name: roles/upgrade
+
+    - name: Handler Tasks
+      ansible.builtin.include_tasks: tasks/test_handler.yml
+
+    - name: Revert Back
+      ansible.builtin.include_tasks: tasks/reversal.yml

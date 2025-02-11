@@ -1,0 +1,30 @@
+---
+
+- name: Check if Leapp report JSON file exists
+  ansible.builtin.stat:
+    path: /var/log/leapp/leapp-report.json  # Change to the actual path
+  register: leapp_report_stat
+
+- name: Fail if Leapp report is not found
+  ansible.builtin.fail:
+    msg: "Leapp Report not found on this server."
+  when: not leapp_report_stat.stat.exists
+
+- name: Read Leapp report JSON file
+  ansible.builtin.slurp:
+    src: /var/log/leapp/leapp-report.json
+  register: leapp_json
+
+- name: Parse JSON content
+  ansible.builtin.set_fact:
+    leapp_data: "{{ leapp_json['content'] | b64decode | from_json }}"
+
+- name: Check for inhibitors
+  ansible.builtin.set_fact:
+    inhibitors_present: >-
+      {{ leapp_data['entries'] | selectattr('groups', 'defined')
+      | selectattr('groups', 'search', 'inhibitor|error') | list | length > 0 }}
+
+- name: Debug inhibitor message
+  ansible.builtin.debug:
+    msg: "{{ 'Inhibitors Present' if inhibitors_present else 'No inhibitors present.' }}"

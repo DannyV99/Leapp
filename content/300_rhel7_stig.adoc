@@ -1,0 +1,3 @@
+// STIG >> RHEL 7 STIG
+
+Placeholder for RHEL 7 STIG documentation
