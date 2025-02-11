@@ -1,4 +1,0 @@
-== Contributing
-
-We are a fledgling community and welcome any new contributors. Get started by opening an issue or pull request. Refer to our [contribution guide](CONTRIBUTING.md) for more information.
-

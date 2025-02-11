@@ -1,3 +1,0 @@
-== Example Playbooks
-
-Example playbooks can be found [here](./playbooks/).

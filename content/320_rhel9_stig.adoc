@@ -1,3 +1,0 @@
-// STIG >> RHEL 9 STIG
-
-Placeholder for RHEL 9 STIG documentation

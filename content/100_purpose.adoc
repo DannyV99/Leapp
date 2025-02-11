@@ -1,4 +1,0 @@
-// About the RHEL Template >> Purpose
-
-The Red Hat Enterprise Linux (RHEL) template is designed to provide a standardized baeline for implementation of new applications on RHEL.  This is not intended to work for all situation, but it should be compatible with the majority of applications.
-

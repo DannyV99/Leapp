@@ -1,7 +1,0 @@
-// Post Provisioning >> Disk Partitioning
-
-Placeholder for Disk Configuration
-
-* How to expand drives
-* How to add new PV/VG/LVs
-
