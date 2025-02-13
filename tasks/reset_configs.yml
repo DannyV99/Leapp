@@ -35,10 +35,20 @@
         - name: Update GRUB after restoring configuration
           command: grub2-mkconfig -o /boot/grub2/grub.cfg
 
-        - name: Reboot system
+        - name: Reboot the server if necessary
           reboot:
-            msg: "Rebooting system to apply GRUB changes."
-            connect_timeout: 5
-            reboot_timeout: 500
-      
+            msg: "Rebooting to update grub configuration"
+            reboot_timeout: 600
+            test_command: whoami
+          register: reboot_status
+
+        - name: Stop playbook after reboot and display message
+          debug:
+            msg: "All configs have been restored.  Automation is complete."
+          when: reboot_status.rebooted
+          run_once: true
+
+        - name: Halt the playbook after the reboot
+          meta: end_play
+          when: reboot_status.rebooted 
       when: grub_backup.stat.exists

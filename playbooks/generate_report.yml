@@ -1,0 +1,47 @@
+---
+    - name: Set the hostname fact
+      set_fact:
+        hostname: "{{ ansible_facts['fqdn'] }}"  # Direct access to hostname fact
+    - name: Set the hostname fact
+      set_fact:
+        current_date: "{{ ansible_facts['date_time']['date'] }}"
+    - name: Set the hostname fact
+      set_fact:
+        os_name: "{{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}"
+
+
+    - name: Read the JSON file
+      ansible.builtin.slurp:
+        src: /var/log/leapp/leapp-report.json
+      register: json_data
+
+    - name: Decode and parse JSON content
+      set_fact:
+        decoded_json: "{{ json_data.content | b64decode | from_json }}"
+
+
+    # Filter out inhibitors based on the 'groups' field
+    - name: Identify entries classified as inhibitors based on 'groups'
+      set_fact:
+        inhibitors: "{{ decoded_json.entries | selectattr('groups', 'search', 'inhibitor') | list }}"
+        non_inhibitors: "{{ decoded_json.entries | rejectattr('groups', 'search', 'inhibitor') | list }}"
+
+
+    # Apply further severity classification to non-inhibitors
+    - name: Filter non-inhibitors based on severity
+      set_fact:
+        non_inhibitors_high: "{{ non_inhibitors | selectattr('severity', 'equalto', 'high') | list }}"
+        non_inhibitors_medium: "{{ non_inhibitors | selectattr('severity', 'equalto', 'medium') | list }}"
+        non_inhibitors_low: "{{ non_inhibitors | selectattr('severity', 'equalto', 'low') | list }}"
+        non_inhibitors_info: "{{ non_inhibitors | selectattr('severity', 'equalto', 'info') | list }}"
+
+    # Generate HTML report
+    - name: Generate HTML report from filtered data
+      ansible.builtin.template:
+        src: templates/leapp_report_template.html.j2
+        dest: /tmp/leapp_report.html
+        mode: '0644'
+
+    - name: Display the generated report path
+      debug:
+        msg: "Report generated at /tmp/leapp_report.html"

@@ -19,7 +19,13 @@
       [remove_pam_pkcs11_module_check]
       confirm = True
   tasks:
+    - name: Check that Log file Does not Already Exist
+      ansible.builtin.include_tasks: ../tasks/check_ripu_log.yml
+
     - name: Generate preupgrade analysis report
       ansible.builtin.import_role:
         name: ../roles/analysis
+
+    - name: Cleanup The Log Files
+      ansible.builtin.include_tasks: ../handlers/main.yml
 ...

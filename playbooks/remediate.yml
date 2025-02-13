@@ -14,7 +14,17 @@
       - leapp_fapolicyd_disable
 
   tasks:
-    - name: Perform remediations on the system
-      ansible.builtin.import_role:
-        name: ../roles/remediate
+    - name: Run Analyzer Role to Check for Inhibitors
+      ansible.builtin.include_tasks: ../tasks/inhibitor_check.yml
+        #register: inhibitor_result
+
+    - block:
+      
+        - name: Perform remediations on the system
+          ansible.builtin.import_role:
+            name: ../roles/remediate
+
+        - ansible.builtin.include_tasks: ../handlers/main.yml
+
+      when: inhibitors_present
 ...
