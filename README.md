@@ -16,4 +16,4 @@ These are the roles included in the collection. Follow the links below to see th
 
 ## Example playbooks
 
-Example playbooks can be found [here](./playbooks/).
+Example playbooks
