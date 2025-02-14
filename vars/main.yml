@@ -37,3 +37,8 @@ selinux_mode: permissive
 infra_leapp_upgrade_system_roles_collection: 'redhat.rhel_system_roles'
 post_upgrade_release: '9.4'
 set_crypto_policies: false
+
+
+###### MISC VARIABLES ######
+
+revert_type: "normal"
