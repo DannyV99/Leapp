@@ -1,7 +1,7 @@
 ---
 - name: leapp-upgrade | Include the parse_leapp_report role to check for inhibitors
   ansible.builtin.include_role:
-    name: infra.leapp.parse_leapp_report
+    name: ../roles/parse_leapp_report
   when: check_leapp_analysis_results
 
 - name: leapp-upgrade | Verify no inhibitor results found during preupgrade
@@ -25,7 +25,7 @@
   vars:
     __repos: "{{ local_repos_pre_leapp }}"
   ansible.builtin.include_role:
-    name: infra.leapp.common
+    name: ../roles/common
     tasks_from: custom_local_repos
   when: leapp_upgrade_type == "custom"
 
@@ -38,7 +38,7 @@
     __repos: "{{ local_repos_leapp }}"
     __leapp_repo_file: /etc/leapp/files/leapp_upgrade_repositories
   ansible.builtin.include_role:
-    name: infra.leapp.common
+    name: ../roles/common
     tasks_from: custom_local_repos
   when:
     - leapp_upgrade_type == 'custom'
@@ -74,7 +74,7 @@
   rescue:
     - name: leapp-upgrade | Include the parse_leapp_report role to check for inhibitors
       ansible.builtin.include_role:
-        name: infra.leapp.parse_leapp_report
+        name: ../roles/parse_leapp_report
 
     - name: leapp-upgrade | Display inhibitors
       ansible.builtin.debug:
