@@ -6,3 +6,5 @@
 
     tasks:
       
+      - name: Revert Config Files
+        ansible.builtin.include_tasks: tasks/reset_configs.yml
