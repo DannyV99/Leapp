@@ -54,7 +54,7 @@
     __repos: "{{ local_repos_leapp }}"
     __leapp_repo_file: /etc/leapp/files/leapp_upgrade_repositories
   ansible.builtin.include_role:
-    name: infra.leapp.common
+    name: ../roles/common
     tasks_from: custom_local_repos
   when:
     - leapp_upgrade_type == 'custom'
@@ -82,7 +82,7 @@
   vars:
     __repos: "{{ local_repos_post_analysis }}"
   ansible.builtin.include_role:
-    name: infra.leapp.common
+    name: ../roles/common
     tasks_from: custom_local_repos
   when: leapp_upgrade_type == "custom"
 
