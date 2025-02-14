@@ -91,6 +91,6 @@
 
 - name: analysis-leapp | Include the parse_leapp_report role to check for inhibitors
   ansible.builtin.include_role:
-    name: infra.leapp.parse_leapp_report
+    name: ../roles/parse_leapp_report
 
 ...
