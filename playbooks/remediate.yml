@@ -24,7 +24,5 @@
           ansible.builtin.import_role:
             name: ../roles/remediate
 
-        - ansible.builtin.include_tasks: ../handlers/main.yml
-
       when: inhibitors_present
 ...
