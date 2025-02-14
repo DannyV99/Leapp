@@ -1,0 +1,8 @@
+---
+  - name: Revert the DNF and Grub Config back to Original
+    hosts: all
+    become: true
+    gather_facts: false
+
+    tasks:
+      
