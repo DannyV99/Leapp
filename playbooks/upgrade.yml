@@ -21,4 +21,7 @@
     - name: Perform OS upgrade
       ansible.builtin.import_role:
         name: ../roles/upgrade
+
+    - name: Final Cleanup of Logs
+      ansible.builtin.include_tasks: handlers/main.yml
 ...
