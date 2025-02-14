@@ -14,6 +14,10 @@
     set_crypto_policies: false
 
   tasks:
+
+    - name: Check that Log file Does not Already Exist
+      ansible.builtin.include_tasks: ../tasks/check_ripu_log.yml
+  
     - name: Perform OS upgrade
       ansible.builtin.import_role:
         name: ../roles/upgrade
