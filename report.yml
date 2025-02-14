@@ -1,0 +1,10 @@
+---
+  - name: Generate Report for User
+    hosts: all
+    become: true
+    gather_facts: false
+
+    tasks:
+      
+      - name: Include Tasks to Generate Report
+        ansible.builtin.include_tasks: tasks/generate_report.yml
