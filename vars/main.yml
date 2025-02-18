@@ -2,9 +2,9 @@
 
 ###### ANALYSIS VARIABLES ######
 
-satellite_organization: "Family"
-satellite_activation_key_pre_leapp: "Leapp"
-satellite_activation_key_leapp: "Leapp"
+satellite_organization: ""
+satellite_activation_key_pre_leapp: ""
+satellite_activation_key_leapp: ""
 
 # By default the analysis role will use:
 # analysis_repos_el7: rhel-7-server-extras-rpms
