@@ -44,11 +44,8 @@
 
         - name: Stop playbook after reboot and display message
           debug:
-            msg: "All configs have been restored.  Automation is complete."
+            msg: "All configs have been restored."
           when: reboot_status.rebooted
           run_once: true
 
-        - name: Halt the playbook after the reboot
-          meta: end_play
-          when: reboot_status.rebooted 
       when: grub_backup.stat.exists
