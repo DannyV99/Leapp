@@ -1,4 +1,4 @@
-# Ansible Leapp Collection
+# Ansible Leapp Automation
 
 ## Overview
 
